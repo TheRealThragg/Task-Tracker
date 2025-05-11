@@ -8,33 +8,33 @@ JSON_FILE = "tasks.json"
 def load_tasks():
     """Load tasks from JSON file. Create fil if it doesn't exist"""
     if not os.path.exists(JSON_FILE):
-        with open(JSON_FILE, 'w') as f:
+        with open(JSON_FILE, 'w', encoding='utf-8') as f: # Add encoding
             json.dump([], f)
         return []
     
-    with open(JSON_FILE, 'r') as f:
+    with open(JSON_FILE, 'r', encoding='utf8') as f:
         try:
             return json.load(f)
         except json.JSONDecodeError:
             return []
                
-def save_tasks(tasks):
+def save_tasks(tasks_list):
     """Save tasks to JSON file."""
-    with open(JSON_FILE, 'w') as f:
-        json.dump(tasks, f, indent=2)
+    with open(JSON_FILE, 'w', encoding='utf-8') as f: # Add encoding
+        json.dump(tasks_list, f, indent=2)
 
 # Load tasks at startup
 tasks = load_tasks()
 
 def add_task():
-    task = input("\ntask-cli add ")
-    if not task.strip():
+    task_list = input("\ntask-cli add ")
+    if not task_list.strip():
         print("-"*50 + "\n")
         print("Task cannot be empty. Please enter a valid task.")
         return
-    tasks.append ({"task": task, "completed": False})
+    tasks.append ({"task": task_list, "completed": False})
     save_tasks(tasks)
-    print(f"task-cli '{task}' added to the list -\n")
+    print(f"task-cli '{task_list}' added to the list -\n")
     x = datetime.datetime.now()
     print(x.strftime("%c"))
 
@@ -49,7 +49,7 @@ def complete_task():
         if 0 <= i < len(tasks):
             tasks[i]["completed"] = True
             save_tasks(tasks) # Save to file
-            print(f"Task {task_to_complete} marked as completed!")
+            print(f"Task {task_to_complete} marked as completed! -\n")
         else:
             print("\n" + "-"*50)
             print(f"Invalid task number: '{task_to_complete}' please enter a valid integer between 1 and {len(tasks)}")
@@ -70,7 +70,7 @@ def update_task():
         if 0 <= i < len(tasks):
             tasks[i]["task"] = new_task
             save_tasks(tasks)
-            print(f"task-cli '{task}' edited!")
+            print(f"task-cli '{task}' edited -\n")
         else:
             print("\n" + "-"*50)
             print(f"Invalid task number: '{task}' is out of range please enter a valid integer between 1 and {len(tasks)}")
@@ -96,27 +96,29 @@ def list_tasks():
 def delete_task():
     list_tasks()
     user_input = input("Enter number to delete: ")
+    task_to_delete = None
     
     try:
         task_to_delete = int(user_input)
-        if 0 <= task_to_delete - 1 < len(tasks):
-            deleted_task = tasks.pop(task_to_delete - 1)
-            save_tasks(tasks)
-            print(f"task-cli {task_to_delete} ('{deleted_task['task']}') has been removed\n")
-            x = datetime.datetime.now()
-            print(x.strftime("%c"))
-        else:
-            print("\n" + "-"*50)
-            print(f"Invalid task number: '{task_to_delete}' is out of range. Please enter a valid number between 1 and {len(tasks)}.")
-            print("-"*50 + "\n")
-            
     except ValueError:
         print("\n" + "*"*50)
         print(f"ERROR: '{task_to_delete}' is not a valid number. Please enter a valid integer.\n")
         print("*"*50 + "\n")
+        return
     except Exception as e:
         print(f"An error occurred: {e}\n")
-
+        
+    if 0 <= task_to_delete - 1 < len(tasks):
+        deleted_task = tasks.pop(task_to_delete - 1)
+        save_tasks(tasks)
+        print(f"task-cli {task_to_delete} ('{deleted_task['task']}') has been removed -\n")
+        x = datetime.datetime.now()
+        print(x.strftime("%c"))
+    else:
+        print("\n" + "-"*50)
+        print(f"Invalid task number: '{task_to_delete}' is out of range. Please enter a valid number between 1 and {len(tasks)}.")
+        print("-"*50 + "\n")
+        
 if __name__ == "__main__":
     while True:
         print("\n")
